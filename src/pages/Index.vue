@@ -209,16 +209,7 @@ export default {
           },
         });
 
-        if (!response) {
-          throw new Error(
-            this.$q.notify({
-              message: `Erro na solicitação 2: ${response.status} - ${response.statusText}`,
-              color: "red",
-            })
-          );
-        }
-
-        const partidas = response.data.matches;
+        const matches = response.data.matches;
 
         let count = 0;
         let casa = "";
@@ -227,19 +218,19 @@ export default {
         let qtdGolsFora = "";
         let competition = "";
 
-        partidas.forEach((partida) => {
-          competition = partida.competition.name;
+        matches.forEach((match) => {
+          competition = match.competition.name;
 
-          if (partida.homeTeam.id === currentMatch.homeTeam.id) {
-            casa = `${partida.homeTeam.name} vs ${partida.awayTeam.name}`;
-            fora = partida.awayTeam.name;
-            qtdGolsCasa = partida.score.fullTime.homeTeam;
-            qtdGolsFora = partida.score.fullTime.awayTeam;
+          if (match.homeTeam.id === currentMatch.homeTeam.id) {
+            casa = `${match.homeTeam.name} vs ${match.awayTeam.name}`;
+            fora = match.awayTeam.name;
+            qtdGolsCasa = match.score.fullTime.homeTeam;
+            qtdGolsFora = match.score.fullTime.awayTeam;
           } else {
-            casa = `${partida.homeTeam.name} vs ${partida.awayTeam.name} 1`;
-            fora = partida.homeTeam.name;
-            qtdGolsCasa = partida.score.fullTime.awayTeam;
-            qtdGolsFora = partida.score.fullTime.homeTeam;
+            casa = `${match.homeTeam.name} vs ${match.awayTeam.name} 1`;
+            fora = match.homeTeam.name;
+            qtdGolsCasa = match.score.fullTime.awayTeam;
+            qtdGolsFora = match.score.fullTime.homeTeam;
           }
 
           count += qtdGolsCasa;
