@@ -35,7 +35,6 @@
       title="Partidas de times da casa com potencial grande de mais de 1.5 gols:"
       :data="partidasBoas"
       :columns="columns"
-      hide-bottom
       row-key="name"
       class="q-mx-lg q-my-lg"
     />
@@ -228,12 +227,12 @@ export default {
           competition = partida.competition.name;
 
           if (partida.homeTeam.id === team.homeTeam.id) {
-            casa = partida.homeTeam.name;
+            casa = `${partida.homeTeam.name} vs ${partida.awayTeam.name}`;
             fora = partida.awayTeam.name;
             qtdGolsCasa = partida.score.fullTime.homeTeam;
             qtdGolsFora = partida.score.fullTime.awayTeam;
           } else {
-            casa = partida.awayTeam.name;
+            casa = `${partida.homeTeam.name} vs ${partida.awayTeam.name} 1`;
             fora = partida.homeTeam.name;
             qtdGolsCasa = partida.score.fullTime.awayTeam;
             qtdGolsFora = partida.score.fullTime.homeTeam;
