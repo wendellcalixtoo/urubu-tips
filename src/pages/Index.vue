@@ -14,16 +14,13 @@
           >
             <q-banner rounded class="bg-grey-3">
               <template v-slot:avatar>
-                <img
-                  :src="match.competitionFlag"
-                  style="width: 100px; height: 64px"
-                />
+                <img :src="match.competitionFlag" alt="banner da competição" class="banner-image"/>
               </template>
               <div class="text-h6">{{ match.competitionName }}</div>
               <ul>
                 <li v-for="(match, idx) in match.matches" :key="idx">
                   {{ match.homeTeam }} vs {{ match.awayTeam }} -
-                  {{ formatarData(match.matchData) }}
+                  {{ formatDate(match.matchData) }}
                 </li>
               </ul>
             </q-banner>
@@ -37,7 +34,12 @@
       :columns="columns"
       row-key="name"
       class="q-mx-lg q-my-lg"
-    />
+      :loading="loading"
+    >
+    <template v-slot:loading>
+      <q-inner-loading showing color="primary" label="Buscando os melhores resultados..." />
+    </template>
+  </q-table>
   </div>
 </template>
 
@@ -89,10 +91,11 @@ export default {
           label: "Data da partida",
           align: "center",
           field: (row) => row.dataPartida,
-          format: (val) => this.formatarData(val),
+          format: (val) => this.formatDate(val),
           sortable: true,
         },
       ],
+      loading: false
     };
   },
   created() {
@@ -107,6 +110,28 @@ export default {
       const tomorrowDateString = tomorrow.toISOString().split("T")[0];
 
       this.getUpcomingMatches(todayDateString, tomorrowDateString);
+    },
+    async getUpcomingMatches(todayDateString, tomorrowDateString) {
+      try {
+        const endpoint = `https://api.football-data.org/v2/matches?dateFrom=${todayDateString}&dateTo=${tomorrowDateString}`;
+
+        const response = await axios.get(endpoint, {
+          headers: {
+            "X-Auth-Token": this.apiKey,
+          },
+        });
+
+        /** Retorna apenas partidas com status 'Agendada' */
+        this.upcomingMatches = response.data.matches.filter(
+          (match) => match.status === "SCHEDULED"
+        );
+
+        console.log("this.upcomingMatches", this.upcomingMatches);
+
+        this.mountHeaderCurrentMatches();
+      } catch (error) {
+        this.showErrorNotification(error);
+      }
     },
     mountHeaderCurrentMatches() {
       this.upcomingMatches.forEach((x) => {
@@ -157,39 +182,19 @@ export default {
         }
       });
 
-      this.buscaUltimosPlacaresTimeDeCasa();
+      this.searchLatestScoresHomeTime();
     },
-    async getUpcomingMatches(todayDateString, tomorrowDateString) {
-      try {
-        const endpoint = `https://api.football-data.org/v2/matches?dateFrom=${todayDateString}&dateTo=${tomorrowDateString}`;
-
-        const response = await axios.get(endpoint, {
-          headers: {
-            "X-Auth-Token": this.apiKey,
-          },
-        });
-
-        /** Retorna apenas partidas com status 'Agendada' */
-        this.upcomingMatches = response.data.matches.filter(
-          (match) => match.status === "SCHEDULED"
-        );
-
-        console.log("this.upcomingMatches", this.upcomingMatches);
-
-        this.mountHeaderCurrentMatches();
-      } catch (error) {
-        this.showErrorNotification(error);
-      }
-    },
-    async buscaUltimosPlacaresTimeDeCasa() {
+    async searchLatestScoresHomeTime() {
       try {
         const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+        this.loading = true
         for (const match of this.upcomingMatches) {
           const detalhesDaPartida = `https://api.football-data.org/v2/teams/${match.homeTeam.id}/matches?status=FINISHED&limit=5`;
 
           await this.getLastResultsWithDelay(detalhesDaPartida, match);
           await delay(5000); // Aguarde 5 segundos entre cada solicitação
         }
+        this.loading = false
       } catch (error) {
         this.showErrorNotification(error);
       }
@@ -266,7 +271,7 @@ export default {
         this.showErrorNotification(error);
       }
     },
-    formatarData(dataString) {
+    formatDate(dataString) {
       const data = new Date(dataString);
       const day = data.getDate().toString().padStart(2, "0");
       const month = (data.getMonth() + 1).toString().padStart(2, "0");
@@ -284,7 +289,7 @@ export default {
 };
 </script>
 <style lang="sass" scoped>
-.my-card
-  width: 100%
-  max-width: 250px
+.banner-image
+  width: 100px
+  height: 64px
 </style>
