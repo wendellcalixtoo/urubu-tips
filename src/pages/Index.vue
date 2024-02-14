@@ -121,7 +121,7 @@ export default {
           },
         });
 
-        /** Retorna apenas partidas com status 'Agendada' */
+        /** Filtra apenas partidas com status 'Agendada' */
         this.upcomingMatches = response.data.matches.filter(
           (match) => match.status === "SCHEDULED"
         );
@@ -138,7 +138,7 @@ export default {
         // Verifica se this.matchesFound está vazio
         if (this.matchesFound.length === 0) {
           // Se estiver vazio, cria um novo objeto de dados e adiciona à this.matchesFound
-          const data = {
+          const matchInfo = {
             competitionName: x.competition.name,
             competitionFlag: x.competition.area.ensignUrl,
             matches: [
@@ -149,14 +149,14 @@ export default {
               },
             ],
           };
-          this.matchesFound.push(data);
+          this.matchesFound.push(matchInfo);
         } else {
           // Se não estiver vazio, verifica se já existe um objeto com o mesmo nome de competição
           let found = false;
-          this.matchesFound.forEach((data) => {
-            if (data.competitionName === x.competition.name) {
+          this.matchesFound.forEach((matchInfo) => {
+            if (matchInfo.competitionName === x.competition.name) {
               // Se já existir um objeto com o mesmo nome de competição, adiciona a partida ao array de partidas
-              data.matches.push({
+              matchInfo.matches.push({
                 awayTeam: x.awayTeam.name,
                 homeTeam: x.homeTeam.name,
                 matchData: x.utcDate,
@@ -166,7 +166,7 @@ export default {
           });
           // Se não encontrou um objeto com o mesmo nome de competição, adiciona um novo objeto de dados
           if (!found) {
-            const data = {
+            const matchInfo = {
               competitionName: x.competition.name,
               competitionFlag: x.competition.area.ensignUrl,
               matches: [
@@ -177,7 +177,7 @@ export default {
                 },
               ],
             };
-            this.matchesFound.push(data);
+            this.matchesFound.push(matchInfo);
           }
         }
       });
@@ -188,21 +188,22 @@ export default {
       try {
         const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
         this.loading = true
-        for (const match of this.upcomingMatches) {
-          const detalhesDaPartida = `https://api.football-data.org/v2/teams/${match.homeTeam.id}/matches?status=FINISHED&limit=5`;
 
-          await this.getLastResultsWithDelay(detalhesDaPartida, match);
+        for (const upcomingMatch of this.upcomingMatches) {
+          const matchEndPoint = `https://api.football-data.org/v2/teams/${upcomingMatch.homeTeam.id}/matches?status=FINISHED&limit=5`;
+
+          await this.getLastResultsWithDelay(matchEndPoint, upcomingMatch);
           await delay(5000); // Aguarde 5 segundos entre cada solicitação
         }
+
         this.loading = false
       } catch (error) {
         this.showErrorNotification(error);
       }
     },
-    async getLastResultsWithDelay(detalhesDaPartida, team) {
-      console.log('----------------------->', team)
+    async getLastResultsWithDelay(matchEndPoint, currentMatch) {
       try {
-        const response = await axios.get(detalhesDaPartida, {
+        const response = await axios.get(matchEndPoint, {
           headers: {
             "X-Auth-Token": this.apiKey,
           },
@@ -227,11 +228,9 @@ export default {
         let competition = "";
 
         partidas.forEach((partida) => {
-          console.log("paritda ----->", partida);
-
           competition = partida.competition.name;
 
-          if (partida.homeTeam.id === team.homeTeam.id) {
+          if (partida.homeTeam.id === currentMatch.homeTeam.id) {
             casa = `${partida.homeTeam.name} vs ${partida.awayTeam.name}`;
             fora = partida.awayTeam.name;
             qtdGolsCasa = partida.score.fullTime.homeTeam;
@@ -253,10 +252,9 @@ export default {
             competition,
             casa,
             count,
-            dataPartida: team.utcDate
-          };
+            dataPartida: currentMatch.utcDate
+          }
 
-          console.log(data);
           this.partidasBoas.push(data);
 
           console.log(
