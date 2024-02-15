@@ -14,7 +14,11 @@
           >
             <q-banner rounded class="bg-grey-3">
               <template v-slot:avatar>
-                <img :src="match.competitionFlag" alt="banner da competição" class="banner-image"/>
+                <img
+                  :src="match.competitionFlag"
+                  alt="banner da competição"
+                  class="banner-image"
+                />
               </template>
               <div class="text-h6">{{ match.competitionName }}</div>
               <ul>
@@ -36,10 +40,14 @@
       class="q-mx-lg q-my-lg"
       :loading="loading"
     >
-    <template v-slot:loading>
-      <q-inner-loading showing color="primary" label="Buscando os melhores resultados..." />
-    </template>
-  </q-table>
+      <template v-slot:loading>
+        <q-inner-loading
+          showing
+          color="primary"
+          label="Buscando os melhores resultados..."
+        />
+      </template>
+    </q-table>
   </div>
 </template>
 
@@ -95,7 +103,7 @@ export default {
           sortable: true,
         },
       ],
-      loading: false
+      loading: false,
     };
   },
   created() {
@@ -187,7 +195,7 @@ export default {
     async searchLatestScoresHomeTime() {
       try {
         const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-        this.loading = true
+        this.loading = true;
 
         for (const upcomingMatch of this.upcomingMatches) {
           const matchEndPoint = `https://api.football-data.org/v2/teams/${upcomingMatch.homeTeam.id}/matches?status=FINISHED&limit=5`;
@@ -196,7 +204,7 @@ export default {
           await delay(5000); // Aguarde 5 segundos entre cada solicitação
         }
 
-        this.loading = false
+        this.loading = false;
       } catch (error) {
         this.showErrorNotification(error);
       }
@@ -227,7 +235,7 @@ export default {
             qtdGolsCasa = match.score.fullTime.homeTeam;
             qtdGolsFora = match.score.fullTime.awayTeam;
           } else {
-            casa = `${match.homeTeam.name} vs ${match.awayTeam.name} 1`;
+            casa = `${match.awayTeam.name} vs ${match.homeTeam.name}`;
             fora = match.homeTeam.name;
             qtdGolsCasa = match.score.fullTime.awayTeam;
             qtdGolsFora = match.score.fullTime.homeTeam;
@@ -243,8 +251,8 @@ export default {
             competition,
             casa,
             count,
-            dataPartida: currentMatch.utcDate
-          }
+            dataPartida: currentMatch.utcDate,
+          };
 
           this.partidasBoas.push(data);
 
