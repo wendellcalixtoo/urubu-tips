@@ -145,8 +145,6 @@ export default {
           (match) => match.status === "SCHEDULED"
         );
 
-        console.log("this.upcomingMatches", this.upcomingMatches);
-
         this.mountHeaderCurrentMatches();
       } catch (error) {
         this.showErrorNotification(error);
@@ -221,6 +219,7 @@ export default {
       }
     },
     async getLastResultsWithDelay(matchEndPoint, currentMatch) {
+      console.log('->', currentMatch)
       try {
         const response = await axios.get(matchEndPoint, {
           headers: {
@@ -237,18 +236,17 @@ export default {
         let halfTimeGols = 0
 
         matches.forEach((match) => {
-        console.log('match', match.score.halfTime)
           const halfTimeResult = match.score
           competition = match.competition.name;
 
           if (match.homeTeam.id === currentMatch.homeTeam.id) {
 
-            casa = `${match.homeTeam.name} vs ${match.awayTeam.name}`;
+            casa = `${currentMatch.awayTeam.name} vs ${currentMatch.homeTeam.name}`;
             qtdGolsCasa = match.score.fullTime.homeTeam;
 
           } else {
 
-            casa = `${match.awayTeam.name} vs ${match.homeTeam.name}`;
+            casa = `${currentMatch.homeTeam.name} vs ${currentMatch.awayTeam.name}`;
             qtdGolsCasa = match.score.fullTime.awayTeam;
 
           }
