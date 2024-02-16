@@ -39,6 +39,7 @@
       row-key="name"
       class="q-mx-lg q-my-lg"
       :loading="loading"
+      dark
     >
       <template v-slot:loading>
         <q-inner-loading
@@ -59,6 +60,7 @@ export default {
     return {
       upcomingMatches: [],
       apiKey: "bfd74489962d4c70ad488cef72e4f000",
+      generalTimeOut: 10000,
       matchesFound: [],
       partidasBoas: [],
       columns: [
@@ -91,7 +93,15 @@ export default {
           label: "Média de gols por partida",
           align: "center",
           field: (row) => row.count,
-          format: (val) => `${val / 5}`,
+          format: (val) => `${val / 10}`,
+          sortable: true,
+        },
+        {
+          name: "halfTimeGols",
+          label: "Qtd de Gols no primeiro tempo",
+          align: "center",
+          field: (row) => row.halfTimeGols,
+          format: (val) => `${val}/5`,
           sortable: true,
         },
         {
@@ -198,10 +208,10 @@ export default {
         this.loading = true;
 
         for (const upcomingMatch of this.upcomingMatches) {
-          const matchEndPoint = `https://api.football-data.org/v2/teams/${upcomingMatch.homeTeam.id}/matches?status=FINISHED&limit=5`;
+          const matchEndPoint = `https://api.football-data.org/v2/teams/${upcomingMatch.homeTeam.id}/matches?status=FINISHED&limit=10`;
 
           await this.getLastResultsWithDelay(matchEndPoint, upcomingMatch);
-          await delay(5000); // Aguarde 5 segundos entre cada solicitação
+          await delay(this.generalTimeOut); // Aguarde 5 segundos entre cada solicitação
         }
 
         this.loading = false;
@@ -221,24 +231,29 @@ export default {
 
         let count = 0;
         let casa = "";
-        let fora = "";
         let qtdGolsCasa = "";
-        let qtdGolsFora = "";
         let competition = "";
+        let halfTimeGols = 0
 
         matches.forEach((match) => {
+        console.log('match', match.score.halfTime)
+          const halfTimeResult = match.score
           competition = match.competition.name;
 
           if (match.homeTeam.id === currentMatch.homeTeam.id) {
+
             casa = `${match.homeTeam.name} vs ${match.awayTeam.name}`;
-            fora = match.awayTeam.name;
             qtdGolsCasa = match.score.fullTime.homeTeam;
-            qtdGolsFora = match.score.fullTime.awayTeam;
+
           } else {
+
             casa = `${match.awayTeam.name} vs ${match.homeTeam.name}`;
-            fora = match.homeTeam.name;
             qtdGolsCasa = match.score.fullTime.awayTeam;
-            qtdGolsFora = match.score.fullTime.homeTeam;
+
+          }
+
+          if ( halfTimeResult.halfTime.awayTeam > 0 || halfTimeResult.halfTime.homeTeam > 0 ) {
+            halfTimeGols++
           }
 
           count += qtdGolsCasa;
@@ -246,23 +261,16 @@ export default {
 
         const target = 1.9;
 
-        if (count / 5 > target) {
+        if (count / 10 > target) {
           const data = {
             competition,
             casa,
             count,
             dataPartida: currentMatch.utcDate,
+            halfTimeGols
           };
 
-          this.partidasBoas.push(data);
-
-          console.log(
-            "-----------------------INÍCIO---------------------------"
-          );
-          console.log(`${competition}: ${casa} ${fora}`);
-          console.log("Total de gols nos últimos 5 jogos:", count);
-          console.log("Média de gols por partida:", count / 5);
-          console.log("-----------------------FIM---------------------------");
+          this.partidasBoas.push(data)
         }
       } catch (error) {
         this.showErrorNotification(error);

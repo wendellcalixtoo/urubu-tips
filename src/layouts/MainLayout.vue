@@ -15,7 +15,7 @@
           Urubu Tips
         </q-toolbar-title>
 
-        <div>v 1.0</div>
+        <div>v 1.1</div>
       </q-toolbar>
     </q-header>
 
