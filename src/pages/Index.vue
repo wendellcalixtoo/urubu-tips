@@ -61,6 +61,7 @@ export default {
       upcomingMatches: [],
       apiKey: "bfd74489962d4c70ad488cef72e4f000",
       generalTimeOut: 10000,
+      numberVerifiedMatches: 5,
       matchesFound: [],
       partidasBoas: [],
       columns: [
@@ -93,7 +94,7 @@ export default {
           label: "Média de gols por partida",
           align: "center",
           field: (row) => row.count,
-          format: (val) => `${val / 10}`,
+          format: (val) => `${val / this.numberVerifiedMatches}`,
           sortable: true,
         },
         {
@@ -208,7 +209,7 @@ export default {
         this.loading = true;
 
         for (const upcomingMatch of this.upcomingMatches) {
-          const matchEndPoint = `https://api.football-data.org/v2/teams/${upcomingMatch.homeTeam.id}/matches?status=FINISHED&limit=10`;
+          const matchEndPoint = `https://api.football-data.org/v2/teams/${upcomingMatch.homeTeam.id}/matches?status=FINISHED&limit=${this.numberVerifiedMatches}`;
 
           await this.getLastResultsWithDelay(matchEndPoint, upcomingMatch);
           await delay(this.generalTimeOut); // Aguarde 5 segundos entre cada solicitação
@@ -259,9 +260,9 @@ export default {
           count += qtdGolsCasa;
         });
 
-        const target = 1.9;
+        const target = 2;
 
-        if (count / 10 > target) {
+        if (count / this.numberVerifiedMatches > target) {
           const data = {
             competition,
             casa,
