@@ -87,7 +87,7 @@ export default {
         },
         {
           name: "casa",
-          label: "Time",
+          label: "Times",
           align: "center",
           field: (row) => row.casa,
           format: (val) => `${val}`,
@@ -95,7 +95,7 @@ export default {
         },
         {
           name: "count",
-          label: "Total de gols nos últimos 5 jogos",
+          label: `Total de gols nos últimos 5 jogos`,
           align: "center",
           field: (row) => row.count,
           format: (val) => `${val}`,
@@ -111,7 +111,7 @@ export default {
         },
         {
           name: "halfTimeGols",
-          label: "Qtd de Gols no primeiro tempo",
+          label: "Quantidade de partidas com gol no 1º tempo",
           align: "center",
           field: (row) => row.halfTimeGols,
           format: (val) => `${val}/5`,
