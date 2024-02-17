@@ -45,7 +45,7 @@
       />
     </div>
     <q-table
-      title="Partidas de times da casa com potencial grande de mais de 1.5 gols:"
+      title="Partidas de times da casa com potencial para mais de 1,5 gols:"
       :data="partidasBoas"
       :columns="columns"
       row-key="name"

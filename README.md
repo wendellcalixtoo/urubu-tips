@@ -1,4 +1,6 @@
 # Quasar App (urubutips)
+![alt text](image.png)
+![alt text](image-1.png)
 
 A Quasar Project
 
