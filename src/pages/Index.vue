@@ -3,8 +3,7 @@
     <q-list bordered class="flat q-mx-lg q-mt-md">
       <q-expansion-item
         expand-separator
-        label="Proximos jogos:"
-        :caption="`Jogos encontrados em ${matchesFound.length} campeonatos diferentes`"
+        :label="`Foram encontradas ${upcomingMatches.length} partidas em ${matchesFound.length} campeonatos diferentes`"
       >
         <q-card class="q-pa-none">
           <q-card-section
@@ -32,6 +31,19 @@
         </q-card>
       </q-expansion-item>
     </q-list>
+    <div v-if="upcomingMatches.length > 0" class="q-mx-lg q-my-lg">
+      <q-knob
+        :min="0"
+        :max="upcomingMatches.length"
+        v-model="verifiedMatches"
+        show-value
+        size="50px"
+        :thickness="0.22"
+        color="teal"
+        track-color="grey-3"
+        class="q-ma-md"
+      />
+    </div>
     <q-table
       title="Partidas de times da casa com potencial grande de mais de 1.5 gols:"
       :data="partidasBoas"
@@ -60,7 +72,7 @@ export default {
     return {
       upcomingMatches: [],
       apiKey: "bfd74489962d4c70ad488cef72e4f000",
-      generalTimeOut: 10000,
+      generalTimeOut: 6000,
       numberVerifiedMatches: 5,
       matchesFound: [],
       partidasBoas: [],
@@ -115,6 +127,7 @@ export default {
         },
       ],
       loading: false,
+      verifiedMatches: 0,
     };
   },
   created() {
@@ -209,6 +222,8 @@ export default {
         for (const upcomingMatch of this.upcomingMatches) {
           const matchEndPoint = `https://api.football-data.org/v2/teams/${upcomingMatch.homeTeam.id}/matches?status=FINISHED&limit=${this.numberVerifiedMatches}`;
 
+          this.verifiedMatches++;
+
           await this.getLastResultsWithDelay(matchEndPoint, upcomingMatch);
           await delay(this.generalTimeOut); // Aguarde 5 segundos entre cada solicitação
         }
@@ -219,7 +234,6 @@ export default {
       }
     },
     async getLastResultsWithDelay(matchEndPoint, currentMatch) {
-      console.log('->', currentMatch)
       try {
         const response = await axios.get(matchEndPoint, {
           headers: {
@@ -233,26 +247,25 @@ export default {
         let casa = "";
         let qtdGolsCasa = "";
         let competition = "";
-        let halfTimeGols = 0
+        let halfTimeGols = 0;
 
         matches.forEach((match) => {
-          const halfTimeResult = match.score
+          const halfTimeResult = match.score;
           competition = match.competition.name;
 
           if (match.homeTeam.id === currentMatch.homeTeam.id) {
-
             casa = `${currentMatch.awayTeam.name} vs ${currentMatch.homeTeam.name}`;
             qtdGolsCasa = match.score.fullTime.homeTeam;
-
           } else {
-
             casa = `${currentMatch.homeTeam.name} vs ${currentMatch.awayTeam.name}`;
             qtdGolsCasa = match.score.fullTime.awayTeam;
-
           }
 
-          if ( halfTimeResult.halfTime.awayTeam > 0 || halfTimeResult.halfTime.homeTeam > 0 ) {
-            halfTimeGols++
+          if (
+            halfTimeResult.halfTime.awayTeam > 0 ||
+            halfTimeResult.halfTime.homeTeam > 0
+          ) {
+            halfTimeGols++;
           }
 
           count += qtdGolsCasa;
@@ -266,10 +279,10 @@ export default {
             casa,
             count,
             dataPartida: currentMatch.utcDate,
-            halfTimeGols
+            halfTimeGols,
           };
 
-          this.partidasBoas.push(data)
+          this.partidasBoas.push(data);
         }
       } catch (error) {
         this.showErrorNotification(error);
