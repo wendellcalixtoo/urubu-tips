@@ -2,16 +2,20 @@
   <div>
     <q-list bordered class="flat q-mx-lg q-mt-md">
       <q-expansion-item
-        expand-separator
+        class="text-center text-h6"
+        icon="sports_soccer"
         :label="`Foram encontradas ${upcomingMatches.length} partidas em ${matchesFound.length} campeonatos diferentes`"
+        header-class="bg-teal text-white"
+        expand-icon-class="text-white"
+        expand-separator
       >
-        <q-card class="q-pa-none">
+        <q-card class="q-pa-none bg-teal-2">
           <q-card-section
             v-for="(match, idx) in matchesFound"
             :key="idx"
             class="q-pa-xs"
           >
-            <q-banner rounded class="bg-grey-3">
+            <q-banner rounded class="bg-teal-1">
               <template v-slot:avatar>
                 <img
                   :src="match.competitionFlag"
@@ -20,47 +24,93 @@
                 />
               </template>
               <div class="text-h6">{{ match.competitionName }}</div>
-              <ul>
-                <li v-for="(match, idx) in match.matches" :key="idx">
-                  {{ match.homeTeam }} vs {{ match.awayTeam }} -
-                  {{ formatDate(match.matchData) }}
-                </li>
-              </ul>
+              <div v-for="(match, idx) in match.matches" :key="idx">
+                {{ match.homeTeam }} vs {{ match.awayTeam }} -
+                {{ formatDate(match.matchData) }}
+              </div>
             </q-banner>
           </q-card-section>
         </q-card>
       </q-expansion-item>
     </q-list>
-    <div v-if="upcomingMatches.length > 0" class="q-mx-lg q-my-lg">
-      <q-knob
-        :min="0"
-        :max="upcomingMatches.length"
-        v-model="verifiedMatches"
-        show-value
-        size="50px"
-        :thickness="0.22"
-        color="teal"
-        track-color="grey-3"
-        class="q-ma-md"
-      />
+
+    <q-separetor></q-separetor>
+
+    <div class="q-px-lg q-pt-lg q-pb-sm text-h5 text-center" v-if="loading">
+      Buscando os melhores resultados... {{ verifiedMatches }}/{{
+        upcomingMatches.length + 1
+      }}
     </div>
-    <q-table
-      title="Partidas de times da casa com potencial para mais de 1,5 gols:"
-      :data="partidasBoas"
-      :columns="columns"
-      row-key="name"
-      class="q-mx-lg q-my-lg"
-      :loading="loading"
-      dark
-    >
-      <template v-slot:loading>
-        <q-inner-loading
-          showing
-          color="primary"
-          label="Buscando os melhores resultados..."
-        />
-      </template>
-    </q-table>
+    <div v-if="loading" class="q-px-lg">
+      <q-markup-table>
+        <thead>
+          <tr>
+            <th class="text-left" style="width: 120px">
+              <q-skeleton animation="blink" type="text" />
+            </th>
+            <th class="text-right">
+              <q-skeleton animation="blink" type="text" />
+            </th>
+            <th class="text-right">
+              <q-skeleton animation="blink" type="text" />
+            </th>
+            <th class="text-right">
+              <q-skeleton animation="blink" type="text" />
+            </th>
+            <th class="text-right">
+              <q-skeleton animation="blink" type="text" />
+            </th>
+            <th class="text-right">
+              <q-skeleton animation="blink" type="text" />
+            </th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr v-for="n in 5" :key="n">
+            <td class="text-left">
+              <q-skeleton animation="blink" type="text" width="85px" />
+            </td>
+            <td class="text-right">
+              <q-skeleton animation="blink" type="text" width="50px" />
+            </td>
+            <td class="text-right">
+              <q-skeleton animation="blink" type="text" width="35px" />
+            </td>
+            <td class="text-right">
+              <q-skeleton animation="blink" type="text" width="65px" />
+            </td>
+            <td class="text-right">
+              <q-skeleton animation="blink" type="text" width="25px" />
+            </td>
+            <td class="text-right">
+              <q-skeleton animation="blink" type="text" width="85px" />
+            </td>
+          </tr>
+        </tbody>
+      </q-markup-table>
+    </div>
+    <div v-else>
+      <div class="q-px-lg q-pt-lg q-pb-sm text-h5 text-center">
+        Partidas de times da casa com potencial para mais de 1,5 gols
+      </div>
+      <q-table
+        :data="partidasBoas"
+        :columns="columns"
+        row-key="name"
+        class="q-mx-lg"
+        :loading="loading"
+        dark
+      >
+        <template v-slot:loading>
+          <q-inner-loading
+            showing
+            color="primary"
+            :label="`Buscando os melhores resultados... ${verifiedMatches}/${upcomingMatches.length}`"
+          />
+        </template>
+      </q-table>
+    </div>
   </div>
 </template>
 
