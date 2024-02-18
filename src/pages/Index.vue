@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="q-px-lg">
     <q-list bordered class="flat q-mx-lg q-mt-md">
       <q-expansion-item
         class="text-center text-h6"
@@ -34,9 +34,7 @@
       </q-expansion-item>
     </q-list>
 
-    <q-separetor></q-separetor>
-
-    <div class="q-px-lg q-pt-lg q-pb-sm text-h5 text-center" v-if="loading">
+    <div class="q-px-lg q-py-md text-h5 text-center" v-if="loading">
       Buscando os melhores resultados... {{ verifiedMatches }}/{{
         upcomingMatches.length + 1
       }}
@@ -91,7 +89,7 @@
       </q-markup-table>
     </div>
     <div v-else>
-      <div class="q-px-lg q-pt-lg q-pb-sm text-h5 text-center">
+      <div class="q-px-lg q-py-md text-h5 text-center">
         Partidas de times da casa com potencial para mais de 1,5 gols
       </div>
       <q-table
@@ -100,6 +98,7 @@
         row-key="name"
         class="q-mx-lg"
         :loading="loading"
+        :pagination="{ rowsPerPage: 10 }"
         dark
       >
         <template v-slot:loading>
