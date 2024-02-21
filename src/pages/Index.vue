@@ -33,10 +33,35 @@
         </q-card>
       </q-expansion-item>
     </q-list>
+    <div>
+      <div class="row q-mx-lg q-my-md">
+        <div class="col">
+          {{ model }} - {{ numberVerifiedMatches }}
+          <q-select
+            outlined
+            v-model="model"
+            :options="options"
+            label="Outlined"
+          />
+        </div>
+        <div class="col">
+          <q-select
+            outlined
+            v-model="numberVerifiedMatches"
+            :options="options1"
+            label="Outlined"
+            emit-value
+          />
+        </div>
+        <div class="col">
+          <q-btn color="primary" label="Primary" @click="searchLatestScoresHomeTime" />
+        </div>
+      </div>
+    </div>
 
     <div class="q-px-lg q-py-md text-h5 text-center" v-if="loading">
       Buscando os melhores resultados... {{ verifiedMatches }}/{{
-        upcomingMatches.length + 1
+        upcomingMatches.length
       }}
     </div>
     <div v-if="loading" class="q-px-lg">
@@ -122,7 +147,6 @@ export default {
       upcomingMatches: [],
       apiKey: "bfd74489962d4c70ad488cef72e4f000",
       generalTimeOut: 6000,
-      numberVerifiedMatches: 5,
       matchesFound: [],
       partidasBoas: [],
       columns: [
@@ -177,6 +201,19 @@ export default {
       ],
       loading: false,
       verifiedMatches: 0,
+      model: "homeTeam",
+      options: [
+        {
+          label: "Casa",
+          value: "homeTeam",
+        },
+        {
+          label: "Fora",
+          value: "awayTeam",
+        },
+      ],
+      numberVerifiedMatches: 5,
+      options1: [5, 10]
     };
   },
   created() {
@@ -261,15 +298,19 @@ export default {
         }
       });
 
-      this.searchLatestScoresHomeTime();
     },
     async searchLatestScoresHomeTime() {
       try {
+        this.partidasBoas = []
+        this.verifiedMatches = 0
+
         const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
         this.loading = true;
 
         for (const upcomingMatch of this.upcomingMatches) {
-          const matchEndPoint = `https://api.football-data.org/v2/teams/${upcomingMatch.homeTeam.id}/matches?status=FINISHED&limit=${this.numberVerifiedMatches}`;
+          const matchEndPoint = `https://api.football-data.org/v2/teams/${upcomingMatch[this.model.value].id}/matches?status=FINISHED&limit=${this.numberVerifiedMatches}`;
+
+          console.log('-->', matchEndPoint)
 
           this.verifiedMatches++;
 
