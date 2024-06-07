@@ -361,7 +361,7 @@ export default {
           count += qtdGolsCasa;
         });
 
-        const target = 2;
+        const target = 1;
 
         if (count / this.numberVerifiedMatches > target) {
           const data = {
