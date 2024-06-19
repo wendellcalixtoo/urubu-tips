@@ -34,27 +34,32 @@
       </q-expansion-item>
     </q-list>
     <div>
-      <div class="row q-mx-lg q-my-md">
+      <div class="row q-mx-lg q-my-md q-gutter-x-md">
         <div class="col">
-          {{ model }} - {{ numberVerifiedMatches }}
+          <!-- {{ model }} - {{ numberVerifiedMatches }} -->
           <q-select
+            dense
             outlined
             v-model="model"
             :options="options"
-            label="Outlined"
+            label="Resultados do time de:"
           />
         </div>
         <div class="col">
           <q-select
+            dense
             outlined
             v-model="numberVerifiedMatches"
             :options="options1"
-            label="Outlined"
+            label="Quantidade de jogos"
             emit-value
           />
         </div>
         <div class="col">
-          <q-btn color="primary" label="Primary" @click="searchLatestScoresHomeTime" />
+          <q-input v-model="tipRange" outlined dense type="text" label="Média de gols por partida" />
+        </div>
+        <div class="col">
+          <q-btn color="teal" label="Gerar resultados" no-caps @click="searchLatestScoresHomeTime" />
         </div>
       </div>
     </div>
@@ -115,7 +120,7 @@
     </div>
     <div v-else>
       <div class="q-px-lg q-py-md text-h5 text-center">
-        Partidas de times da casa com potencial para mais de 1,5 gols
+        Partidas de times da casa com potencial para mais de {{ tipRange }} gols
       </div>
       <q-table
         :data="partidasBoas"
@@ -147,6 +152,7 @@ export default {
       upcomingMatches: [],
       apiKey: "bfd74489962d4c70ad488cef72e4f000",
       generalTimeOut: 6000,
+      tipRange: 2,
       matchesFound: [],
       partidasBoas: [],
       columns: [
@@ -168,7 +174,7 @@ export default {
         },
         {
           name: "count",
-          label: `Total de gols nos últimos 5 jogos`,
+          label: 'Total de gols nos últimos x jogos',
           align: "center",
           field: (row) => row.count,
           format: (val) => `${val}`,
@@ -201,7 +207,10 @@ export default {
       ],
       loading: false,
       verifiedMatches: 0,
-      model: "homeTeam",
+      model: {
+        label: "Casa",
+        value: "homeTeam",
+      },
       options: [
         {
           label: "Casa",
@@ -361,9 +370,7 @@ export default {
           count += qtdGolsCasa;
         });
 
-        const target = 1;
-
-        if (count / this.numberVerifiedMatches > target) {
+        if (count / this.numberVerifiedMatches > this.tipRange) {
           const data = {
             competition,
             casa,
